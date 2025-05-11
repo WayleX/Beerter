@@ -6,6 +6,9 @@ This repository implements a **Beer Review System** built with a microservice ar
 
 ## Architecture Overview
 
+## Architecture Overview
+
+```plaintext
                               +-----------------+
                               |   Consul / DNS  |
                               +--------+--------+
@@ -28,8 +31,8 @@ This repository implements a **Beer Review System** built with a microservice ar
                              |  – FastAPI gateway |
                              |  – Static beer CSV |
                              +--------------------+
+```
 
----
 
 ## Component Breakdown
 
