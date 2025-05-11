@@ -1,5 +1,5 @@
-import React from 'react';
-import Link from 'next/link';
+import React from "react";
+import Link from "next/link";
 
 const Header = () => {
   return (
@@ -7,26 +7,45 @@ const Header = () => {
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <h1 className="text-xl font-semibold">Beerter</h1>
         <nav className="space-x-4">
+          <Link href="/beers">
+            <span className="cursor-pointer hover:bg-gray-700 px-3 py-2 rounded">
+              Supported Beers
+            </span>
+          </Link>
           <Link href="/">
-            <span className="cursor-pointer hover:bg-gray-700 px-3 py-2 rounded">Home</span>
+            <span className="cursor-pointer hover:bg-gray-700 px-3 py-2 rounded">
+              Home
+            </span>
           </Link>
           <Link href="/addBeer">
-            <span className="cursor-pointer hover:bg-gray-700 px-3 py-2 rounded">Add Beer</span>
+            <span className="cursor-pointer hover:bg-gray-700 px-3 py-2 rounded">
+              Add Beer
+            </span>
           </Link>
           <Link href="/signIn">
-            <span className="cursor-pointer hover:bg-gray-700 px-3 py-2 rounded">Login</span>
+            <span className="cursor-pointer hover:bg-gray-700 px-3 py-2 rounded">
+              Login
+            </span>
           </Link>
           <Link href="/register">
-            <span className="cursor-pointer hover:bg-gray-700 px-3 py-2 rounded">Register</span>
+            <span className="cursor-pointer hover:bg-gray-700 px-3 py-2 rounded">
+              Register
+            </span>
           </Link>
           <Link href="/reviews">
-            <span className="cursor-pointer hover:bg-gray-700 px-3 py-2 rounded">Reviews</span>
+            <span className="cursor-pointer hover:bg-gray-700 px-3 py-2 rounded">
+              Reviews
+            </span>
           </Link>
           <Link href="/game">
-            <span className="cursor-pointer hover:bg-gray-700 px-3 py-2 rounded">Game</span>
+            <span className="cursor-pointer hover:bg-gray-700 px-3 py-2 rounded">
+              Game
+            </span>
           </Link>
           <Link href="/search">
-            <span className="cursor-pointer hover:bg-gray-700 px-3 py-2 rounded">Search</span>
+            <span className="cursor-pointer hover:bg-gray-700 px-3 py-2 rounded">
+              Search
+            </span>
           </Link>
           <span>{}</span>
         </nav>

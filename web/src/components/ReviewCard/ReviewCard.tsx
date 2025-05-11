@@ -27,7 +27,7 @@ const ReviewCard: React.FC<{ review: Review }> = ({ review }) => {
 
     try {
       const res = await fetch(
-        `http://localhost:8009/post_like/${review.id}`,
+        `http://10.10.229.93:8009/post_like/${review.id}`,
         {
           method: "POST",
           headers: {
@@ -61,7 +61,7 @@ const ReviewCard: React.FC<{ review: Review }> = ({ review }) => {
 
     try {
       const res = await fetch(
-        `http://localhost:8009/post_like/${review.id}`,
+        `http://10.10.229.93:8009/post_like/${review.id}`,
         {
           method: "DELETE",
           headers: {

@@ -1,7 +1,9 @@
 "use client";
 
+import Header from "@/components/Header/Header";
 import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import useAuthGuard from "@/hooks/checker/hook";
 
 export interface Review {
   _id: string;
@@ -34,6 +36,7 @@ const decodeToken = (token: string): { user_id: string } | null => {
 };
 
 const ReviewDetailPage = () => {
+  useAuthGuard();
   const { id } = useParams();
   const [review, setReview] = useState<Review | null>(null);
   const [headline, setHeadline] = useState("");
@@ -66,7 +69,7 @@ const ReviewDetailPage = () => {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("Token not found");
 
-      const res = await fetch(`http://localhost:8009/get_review/${id}`, {
+      const res = await fetch(`http://10.10.229.93:8009/get_review/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -95,7 +98,7 @@ const ReviewDetailPage = () => {
       if (!token) throw new Error("Token missing");
 
       const res = await fetch(
-        `http://localhost:8009/edit_review/${review.id}`,
+        `http://10.10.229.93:8009/edit_review/${review.id}`,
         {
           method: "PUT",
           headers: {
@@ -131,6 +134,8 @@ const ReviewDetailPage = () => {
   const isOwner = currentUserId === review.user_id; // Check if the current user is the owner of the review
 
   return (
+    <div>
+    <Header/>
     <div className="max-w-xl mx-auto mt-12 space-y-4">
       {isOwner ? (
         <>
@@ -167,6 +172,7 @@ const ReviewDetailPage = () => {
       ) : (
         <ReviewCard review={review} />
       )}
+    </div>
     </div>
   );
 };

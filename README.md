@@ -2,25 +2,32 @@
 
 This repository implements a **Beer Review System** built with a microservice architecture. It provides user authentication, review management, personalized feeds, and a façade API that ties everything together.
 
----
+## Vision
 
-## Architecture Overview
+We aim to deliver a highly modular and scalable platform where beer enthusiasts can discover, review, and share feedback on their favorite brews. By leveraging microservices, we ensure each component (user, reviews, feed, and gateway) can evolve independently, handle varying loads, and integrate with third-party systems.
+
+## Use Cases
+
+- As a user, I want to submit and edit beer reviews with text and star ratings to share my experience.
+- As a brewery, I want to analyze text and keyword search on reviews to gather customer insights.
+
+---
 
 ## Architecture Overview
 
 ```plaintext
                               +-----------------+
-                              |   Consul / DNS  |
+                              |      Consul     |
                               +--------+--------+
                                        |
            +---------------------------+---------------------------+
            |                           |                           |
-+----------v----------+    +-----------v-----------+    +----------v---------+
-|  user_microservice  |    | reviews_microservice  |    |  feed_microservice |
-|  – FastAPI          |    |  – FastAPI            |    |  – FastAPI         |
-|  – PostgreSQL       |    |  – MongoDB            |    |  – Redis cache     |
-|  – RabbitMQ (likes) |    |  – Text & keyword     |    |  – Aggregates      |
-+----------+----------+    |    search on reviews  |    +----------+---------+
++----------v----------+    +-----------v-----------+    +----------v------------+
+|  user_microservice  |    | reviews_microservice  |    |  feed_microservice    |
+|  – FastAPI          |    |  – FastAPI            |    |  – FastAPI            |
+|  – PostgreSQL       |    |  – MongoDB(replication)|   |  – Redis              |
+|  – RabbitMQ (likes) |    |  – Text & keyword     |    |  – Service duplication|
++----------+----------+    |    search on reviews  |    +----------+------------+
            |               +-----------+-----------+               |
            |                           |                           |
            |   Async “like/unlike”     |   Fetch reviews & likes   |
@@ -29,7 +36,6 @@ This repository implements a **Beer Review System** built with a microservice ar
                              +---------v---------+
                              | facade_microservice|
                              |  – FastAPI gateway |
-                             |  – Static beer CSV |
                              +--------------------+
 ```
 

@@ -20,7 +20,7 @@ c = consul.Consul(host="consul", port=8500)
 service_name = "reviews-service"
 c.agent.service.register(
     name=service_name,
-    service_id=str(random.randint(1, 100000)),
+    service_id=service_name + str(port),
     port=port,
 
     check=consul.Check.http(
@@ -95,6 +95,7 @@ def read_root():
 
 @app.post("/reviews/")
 async def create_review(review: reviewModel):
+    print("LOG: Creating review:", review.model_dump_json())
     now = datetime.utcnow()
     review_dict = review.dict()
     review_dict["created_at"] = now

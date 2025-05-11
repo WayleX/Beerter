@@ -1,9 +1,20 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "@/components/Header/Header";
+import useAuthGuard from "@/hooks/checker/hook";
+
+interface Beer {
+  Name: string;
+  ABV: string;
+  Origin: string;
+  Sort: string;
+  Type: string;
+  Type1: string;
+}
 
 const ReviewPage = () => {
+  useAuthGuard();
   const [form, setForm] = useState({
     headline: "",
     review: "",
@@ -11,10 +22,28 @@ const ReviewPage = () => {
     product_id: "",
   });
 
+  const [beers, setBeers] = useState<Beer[]>([]);
   const [responseMessage, setResponseMessage] = useState("");
 
+  useEffect(() => {
+    const fetchBeers = async () => {
+      try {
+        const res = await fetch("http://10.10.229.93:8009/get_all_beers");
+        const data = await res.json();
+        console.log(data);
+        setBeers(data || []);
+      } catch (error) {
+        console.error("Error fetching beers:", error);
+      }
+    };
+
+    fetchBeers();
+  }, []);
+
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, value } = e.target;
     setForm({
@@ -34,7 +63,7 @@ const ReviewPage = () => {
     }
 
     try {
-      const res = await fetch("http://localhost:8009/post_review", {
+      const res = await fetch("http://10.10.229.93:8009/post_review", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -42,15 +71,14 @@ const ReviewPage = () => {
         },
         body: JSON.stringify(form),
       });
+      console.log("Response:", form);
 
       if (!res.ok) {
         const errorData = await res.json();
         setResponseMessage(`Error: ${errorData.message || res.statusText}`);
       } else {
-        const data = await res.json();
-        setResponseMessage(
-          `Success! Review submitted: ${JSON.stringify(data)}`
-        );
+        await res.json();
+        setResponseMessage("Success! Review submitted.");
         setForm({ headline: "", review: "", rating: 1, product_id: "" });
       }
     } catch (error) {
@@ -95,15 +123,20 @@ const ReviewPage = () => {
             required
             className="px-4 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"
           />
-          <input
-            type="text"
-            name="product_id"
-            placeholder="Product ID"
+          <select
+            name="product_id" // <- fix this line
             value={form.product_id}
             onChange={handleChange}
             required
             className="px-4 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"
-          />
+          >
+            <option value="">Select a beer</option>
+            {beers.map((beer, index) => (
+              <option key={index} value={beer.Name}>
+                {beer.Name}
+              </option>
+            ))}
+          </select>
           <button
             type="submit"
             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"

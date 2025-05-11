@@ -8,6 +8,8 @@ import consul
 import random
 import csv
 import os
+import pika, json
+from datetime import datetime
 
 app = FastAPI()
 
@@ -38,7 +40,7 @@ port = 8009
 service_name = "facade-service"
 c.agent.service.register(
     name=service_name,
-    service_id=str(random.randint(1, 100000)),
+    service_id=service_name,
     port=port,
     check=consul.Check.http(
         url = f"http://beer_review_facade_service:{port}/",
@@ -46,7 +48,21 @@ c.agent.service.register(
     )
 )
 
+# RabbitMQ setup
+RABBITMQ_URL = os.getenv('RABBITMQ_URL', 'amqp://guest:guest@rabbitmq:5672/')
 
+def publish_event(event: dict):
+    # create fresh connection and channel per event
+    params = pika.URLParameters(RABBITMQ_URL)
+    conn = pika.BlockingConnection(params)
+    ch = conn.channel()
+    ch.queue_declare(queue='likes', durable=True)
+    ch.basic_publish(
+        exchange='', routing_key='likes',
+        body=json.dumps(event),
+        properties=pika.BasicProperties(delivery_mode=2)
+    )
+    conn.close()
 
 def find_service(service_name):
     c = consul.Consul(host="consul", port=8500)
@@ -348,7 +364,7 @@ async def edit_review(
             response = await client.put(
                 f"{REVIEW_SERVICE_URL}/reviews/{review_id}",
                 json=payload,
-                headers={"Authorization": raw_token}
+                headers={"Authorization":raw_token}
             )
             response.raise_for_status()
             return response.json()
@@ -369,48 +385,24 @@ def list_beer_names():
 
 @app.post("/post_like/{review_id}")
 async def post_like(review_id: str, authorization: Annotated[str | None, Header()] = None):
-    # authenticate user and forward like request
-    raw_token = authorization
-    await get_user_from_token(authorization)
-    async with httpx.AsyncClient() as client:
-        try:
-            ports = find_service('beer_review_user_service')
-            port = random.choice(ports)
-            USER_SERVICE_URL = f"http://beer_review_user_service_{port}:{port}"
-            response = await client.post(
-                f"{USER_SERVICE_URL}/like",
-                params={"post_id": review_id},
-                headers={"Authorization": raw_token}
-            )
-            response.raise_for_status()
-            return response.json()
-        except httpx.HTTPError as e:
-            status_code = e.response.status_code if hasattr(e, "response") else 500
-            detail = e.response.json().get("detail", "Like service error") if hasattr(e, "response") else str(e)
-            raise HTTPException(status_code=status_code, detail=detail)
-    
+    user = await get_user_from_token(authorization)
+    uid = user.get('user_id') or user.get('id')
+    if uid is None:
+        raise HTTPException(status_code=500, detail="user_id missing from verify response")
+    event = {"type": "like", "user_id": uid, "post_id": review_id, "timestamp": datetime.utcnow().isoformat()}
+    publish_event(event)
+    return {"msg": "Like event published", "post_id": review_id}
+
 @app.delete("/post_like/{review_id}")
 async def delete_like(review_id: str, authorization: Annotated[str | None, Header()] = None):
-    # authenticate user and forward unlike request
-    raw_token = authorization
-    await get_user_from_token(authorization)
-    async with httpx.AsyncClient() as client:
-        try:
-            ports = find_service('beer_review_user_service')
-            port = random.choice(ports)
-            USER_SERVICE_URL = f"http://beer_review_user_service_{port}:{port}"
-            response = await client.delete(
-                f"{USER_SERVICE_URL}/like",
-                params={"post_id": review_id},
-                headers={"Authorization": raw_token}
-            )
-            response.raise_for_status()
-            return response.json()
-        except httpx.HTTPError as e:
-            status_code = e.response.status_code if hasattr(e, "response") else 500
-            detail = e.response.json().get("detail", "Unlike service error") if hasattr(e, "response") else str(e)
-            raise HTTPException(status_code=status_code, detail=detail)
-    
+    user = await get_user_from_token(authorization)
+    uid = user.get('user_id') or user.get('id')
+    if uid is None:
+        raise HTTPException(status_code=500, detail="user_id missing from verify response")
+    event = {"type": "unlike", "user_id": uid, "post_id": review_id, "timestamp": datetime.utcnow().isoformat()}
+    publish_event(event)
+    return {"msg": "Unlike event published", "post_id": review_id}
+
 @app.get("/get_likes")
 async def get_likes(authorization: Annotated[str | None, Header()] = None):
     # authenticate and retrieve liked posts

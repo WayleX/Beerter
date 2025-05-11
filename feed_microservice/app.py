@@ -13,7 +13,6 @@ from fastapi import FastAPI, Depends, HTTPException, Query, Header, BackgroundTa
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-# Initialize FastAPI app
 title = "Feed Service"
 app = FastAPI(title=title)
 
@@ -21,7 +20,6 @@ app = FastAPI(title=title)
 o = ["*"]
 app.add_middleware(CORSMiddleware, allow_origins=o, allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
-# Redis configuration
 env_red = os.getenv('REDIS_HOST', 'redis')
 env_rp = int(os.getenv('REDIS_PORT', 6379))
 pool = redis.ConnectionPool(host=env_red, port=env_rp, decode_responses=True)
@@ -30,20 +28,19 @@ def get_redis():
     """Return a Redis client from the connection pool"""
     return redis.Redis(connection_pool=pool)
 
-# Constants
-TTL = 3600  # Cache TTL for 1 hour (in seconds)
+TTL = 3600
 
-# Consul client for service discovery
 c = consul.Consul(host="consul", port=8500)
 
 service_name = "feed-service"
+service_port = int(os.getenv('SERVICE_PORT', 8000))
 service_id = os.getenv('SERVICE_NAME', str(uuid.uuid4()))
 port = int(os.getenv('PORT', 8000))
 service_host = os.getenv('SERVICE_NAME', socket.gethostname())
 print(f"Registering service {service_name} with id {service_id} on port {port}")
 c.agent.service.register(
     name=service_name,
-    service_id=service_id,
+    service_id=service_name+str(service_port),
     address=service_host,
     port=port,
     check=consul.Check.http(
@@ -53,7 +50,6 @@ c.agent.service.register(
 )
 print(f"Service {service_name} registered successfully")
 
-# Pydantic models
 class ReviewItem(BaseModel):
     id: str
     headline: str
@@ -70,7 +66,6 @@ class FeedResponse(BaseModel):
     source: str
     reviews: List[ReviewItem]
 
-# Helper: discover ports
 def discover(name: str):
     _, nodes = c.health.service(name, passing=True)
     return [n['Service']['Port'] for n in nodes]
@@ -78,7 +73,7 @@ def discover(name: str):
 @app.get("/health")
 def health():
     """Health check endpoint"""
-    return {"status": "healthyhuy", "timestamp": datetime.utcnow()}
+    return {"status": "healthy", "timestamp": datetime.utcnow()}
 
 @app.post("/refresh_feed", response_model=FeedResponse)
 async def refresh_feed(authorization: Optional[str] = Header(None), redis_client: redis.Redis = Depends(get_redis)):

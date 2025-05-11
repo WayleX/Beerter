@@ -12,8 +12,6 @@ NETWORK_NAME=${NETWORK_NAME:-beer_review_network}
 APP_IMAGE="feed-service"
 APP_CONTAINER_PREFIX="feed-service"
 
-# Ensure the target network exists (assumes already created by other scripts)
-# Connect containers to the existing ${NETWORK_NAME} network
 
 # Start Redis on the shared network
 # Remove any existing Redis container to avoid port conflicts
@@ -22,6 +20,7 @@ if sudo docker ps -a --format '{{.Names}}' | grep -q "^${REDIS_CONTAINER}$"; the
     sudo docker stop "$REDIS_CONTAINER" &>/dev/null || true
     sudo docker rm "$REDIS_CONTAINER" &>/dev/null || true
 fi
+
 # Start a fresh Redis container on the shared network (no host port mapping)
 echo "Starting Redis container $REDIS_CONTAINER on network $NETWORK_NAME"
 sudo docker run -d --name "$REDIS_CONTAINER" \
@@ -59,6 +58,7 @@ do
         -e REDIS_HOST="$REDIS_CONTAINER" \
         -e REDIS_PORT="$REDIS_PORT" \
         -e PORT="8000" \
+        -e SERVICE_PORT="$PORT" \
         "$APP_IMAGE"
 done
 

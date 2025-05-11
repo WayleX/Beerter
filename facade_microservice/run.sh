@@ -14,7 +14,7 @@ CONTAINER_NAME="beer_review_facade_service"
 
 # Build the image
 echo "Building facade service image"
-sudo docker build -t beer_review_facade_service ../backend
+sudo docker build -t beer_review_facade_service ../facade_microservice
 
 # Check if container exists
 if sudo docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
