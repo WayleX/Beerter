@@ -1,0 +1,14 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+# Also install the consumer script dependencies
+ENV PYTHONUNBUFFERED=1
+# Copy consumer script
+COPY consume_likes.py .
+
+COPY . .
+
+CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8001"]

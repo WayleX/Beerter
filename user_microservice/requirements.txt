@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+passlib
+python-jose
+pyjwt
+pydantic
+py-consul
+kafka-python
+pika
+pydantic[email]
