@@ -78,61 +78,60 @@ This repository implements a **Beer Review System** built with a microservice ar
 ## Quickstart
 
 1. Create Docker network:  
-   ```bash
-   ./setup.sh
-
-Start Consul:
-
+```bash
+./setup.sh
+```
+2. Start Consul:
+```bash
 ./consul.sh
-
-Start RabbitMQ:
-
+```
+3. Start RabbitMQ:
+```bash
 ./rabbitmq_setup.sh
-
-Launch PostgreSQL for users:
-
+```
+4. Launch PostgreSQL for users:
+```bash
 user_microservice/postgre.sh
-
-Build & run user service + consumer:
-
+```
+5. Build & run user service + consumer:
+```bash
 user_microservice/run.sh
 user_microservice/run_consumer.sh
-
-Setup MongoDB and run reviews service:
-
+```
+6. Setup MongoDB and run reviews service:
+```bash
 reviews_microservice/setup_database.sh
 reviews_microservice/run_reviews_microservice.sh
-
-Start feed service (with 2 instances by default):
-
+```
+7. Start feed service (with 2 instances by default):
+```bash
 feed_microservice/start.sh 2
-
-Build & run facade
-
+```
+8. Build & run facade
+```bash
 facade_microservice/run.sh
-
+```
 Endpoints
 
 User service:
-
+```
 POST /register, POST /login, GET /verify
 
 POST /like, DELETE /like, GET /likes
-
+```
 Reviews service:
-
+```
 POST /reviews/, GET /reviews/, GET /reviews/{id},
 
 Search: /reviews/search/ & /reviews/keyword/{keyword}
-
+```
 Feed service:
-
+```
 POST /refresh_feed, GET /feed
-
+```
 Facade:
-
 Authentication & user ops, review forwarding, beer list: 
-
+```
 GET /get_all_beers, GET /beers,
-
-Review proxy: /post_review, /get_reviews*, /post_like/{id}, /get_feed, /refresh_feed
+```
+Review proxy: `/post_review, /get_reviews*, /post_like/{id}, /get_feed, /refresh_feed`
