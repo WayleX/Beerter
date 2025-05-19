@@ -15,29 +15,7 @@ We aim to deliver a highly modular and scalable platform where beer enthusiasts 
 
 ## Architecture Overview
 
-```plaintext
-                              +-----------------+
-                              |      Consul     |
-                              +--------+--------+
-                                       |
-           +---------------------------+---------------------------+
-           |                           |                           |
-+----------v----------+    +-----------v-----------+    +----------v------------+
-|  user_microservice  |    | reviews_microservice  |    |  feed_microservice    |
-|  – FastAPI          |    |  – FastAPI            |    |  – FastAPI            |
-|  – PostgreSQL       |    |  – MongoDB(replication)|   |  – Redis              |
-|  – RabbitMQ (likes) |    |  – Text & keyword     |    |  – Service duplication|
-+----------+----------+    |    search on reviews  |    +----------+------------+
-           |               +-----------+-----------+               |
-           |                           |                           |
-           |   Async “like/unlike”     |   Fetch reviews & likes   |
-           +---------------------------+---------------------------+
-                                       |
-                             +---------v---------+
-                             | facade_microservice|
-                             |  – FastAPI gateway |
-                             +--------------------+
-```
+![](Untitled%20Diagram.png)
 
 
 ## Component Breakdown
